@@ -1,8 +1,5 @@
 {
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
-  ]
+  "framework": null,
+  "buildCommand": "bun run build",
+  "outputDirectory": ".output/public"
 }
