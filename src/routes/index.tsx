@@ -68,6 +68,7 @@ const NAV = [
 
 function Portfolio() {
   const [resumeOpen, setResumeOpen] = useState(false);
+  const [activeCase, setActiveCase] = useState<CaseStudy | null>(null);
 
   return (
     <>
@@ -76,16 +77,17 @@ function Portfolio() {
       <Background3D />
       <ThemeSwitcher />
       <ResumeModal open={resumeOpen} onClose={() => setResumeOpen(false)} />
+      <CaseStudyModal study={activeCase} onClose={() => setActiveCase(null)} />
 
       <Nav onResume={() => setResumeOpen(true)} />
 
-      <main className="relative">
+      <main id="main" className="relative">
         <Hero onResume={() => setResumeOpen(true)} />
         <About />
         <Skills />
         <Experience />
         <Services />
-        <Work />
+        <Work onOpen={setActiveCase} />
         <Stats />
         <Analytics />
         <Testimonials />
