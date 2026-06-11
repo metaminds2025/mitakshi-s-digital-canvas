@@ -502,30 +502,22 @@ function Services() {
 
 /* ---------------- WORK ---------------- */
 const WORK_CATEGORIES = ["All", "Social Media", "Branding", "Content", "Design", "LinkedIn"] as const;
-const WORK = [
-  { t: "Local boutique relaunch", cat: "Social Media", tone: ["#b388ff", "#7fd6ff"] },
-  { t: "Studio brand system", cat: "Branding", tone: ["#ff9ec7", "#ffd6a5"] },
-  { t: "Founder LinkedIn growth", cat: "LinkedIn", tone: ["#7fd6ff", "#6fe7d8"] },
-  { t: "Cafe content calendar", cat: "Content", tone: ["#ffd6a5", "#ff9ec7"] },
-  { t: "Carousel design system", cat: "Design", tone: ["#b388ff", "#ff9ec7"] },
-  { t: "Festival campaign push", cat: "Social Media", tone: ["#ff9c5b", "#ff5fa2"] },
-  { t: "Educator personal brand", cat: "LinkedIn", tone: ["#c9a8ff", "#9a8bff"] },
-  { t: "Wellness brand visuals", cat: "Design", tone: ["#6fe7d8", "#b388ff"] },
-];
 
-function Work() {
+function Work({ onOpen }: { onOpen: (s: CaseStudy) => void }) {
   const [filter, setFilter] = useState<(typeof WORK_CATEGORIES)[number]>("All");
-  const visible = WORK.filter((w) => filter === "All" || w.cat === filter);
+  const visible = CASE_STUDIES.filter((w) => filter === "All" || w.category === filter);
   return (
     <section id="work" className="relative px-6 py-32 md:px-12">
       <div className="mx-auto max-w-7xl">
-        <SectionHead kicker="Selected Work" title={<>Recent <span className="text-gradient">projects.</span></>} />
-        <div className="mb-10 flex flex-wrap gap-2">
+        <SectionHead kicker="Selected Work" title={<>Recent <span className="text-gradient">case studies.</span></>} intro="Click any project to open the full case study — gallery, role, tools and outcomes." />
+        <div role="tablist" aria-label="Filter projects by category" className="mb-10 flex flex-wrap gap-2">
           {WORK_CATEGORIES.map((c) => (
             <button
               key={c}
+              role="tab"
+              aria-selected={filter === c}
               onClick={() => setFilter(c)}
-              className={`rounded-full border border-border px-4 py-1.5 text-sm transition ${
+              className={`rounded-full border border-border px-4 py-1.5 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)] ${
                 filter === c ? "bg-primary text-primary-foreground" : "bg-card/40 hover:bg-secondary"
               }`}
             >
@@ -535,27 +527,42 @@ function Work() {
         </div>
         <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4">
           {visible.map((w, i) => (
-            <motion.figure
-              key={w.t + i}
+            <motion.button
+              key={w.slug}
               layout
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }}
+              type="button"
+              onClick={() => onOpen(w)}
+              aria-label={`Open case study: ${w.title}`}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6 }}
               whileHover={{ y: -6 }}
-              className="glass group relative break-inside-avoid overflow-hidden rounded-3xl"
+              className="glass group relative block w-full break-inside-avoid overflow-hidden rounded-3xl text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
               style={{ aspectRatio: i % 3 === 0 ? "4/5" : i % 3 === 1 ? "1/1" : "3/4" }}
             >
+              <img
+                src={w.cover}
+                alt={`${w.title} — ${w.category} project preview`}
+                loading="lazy"
+                width={1024}
+                height={1024}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
               <div
                 className="absolute inset-0"
-                style={{ background: `linear-gradient(135deg, ${w.tone[0]}, ${w.tone[1]})`, opacity: 0.85 }}
+                style={{
+                  background: `linear-gradient(180deg, transparent 30%, color-mix(in oklab, var(--color-background) 85%, transparent)), linear-gradient(135deg, ${w.tone[0]}33, ${w.tone[1]}33)`,
+                }}
               />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.4),transparent_50%)]" />
-              <figcaption className="absolute inset-0 flex flex-col justify-end p-6">
+              <figcaption className="absolute inset-x-0 bottom-0 p-5">
                 <div className="glass rounded-2xl p-4 transition-transform group-hover:-translate-y-1">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{w.cat}</p>
-                  <p className="mt-1 text-lg">{w.t}</p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{w.category}</p>
+                  <p className="mt-1 text-lg">{w.title}</p>
+                  <p className="mt-2 text-xs text-gradient opacity-0 transition-opacity group-hover:opacity-100">View case study →</p>
                 </div>
               </figcaption>
-            </motion.figure>
+            </motion.button>
           ))}
         </div>
       </div>
