@@ -50,10 +50,13 @@ export function ThemeSwitcher() {
         onClick={() => setOpen((o) => !o)}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
-        className="glass flex h-14 w-14 items-center justify-center rounded-full glow-ring"
-        aria-label="Theme switcher"
+        className="glass flex h-14 w-14 items-center justify-center rounded-full glow-ring focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
+        aria-label={open ? "Close theme switcher" : `Open theme switcher (current theme: ${theme})`}
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
         <motion.div
+          aria-hidden="true"
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className="h-6 w-6 rounded-full"

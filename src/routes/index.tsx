@@ -8,19 +8,48 @@ import { CustomCursor } from "@/components/portfolio/CustomCursor";
 import { ResumeModal } from "@/components/portfolio/ResumeModal";
 import { ProfileImage } from "@/components/portfolio/ProfileImage";
 import { Counter } from "@/components/portfolio/Counter";
+import { CaseStudyModal } from "@/components/portfolio/CaseStudyModal";
+import { CASE_STUDIES, type CaseStudy } from "@/lib/portfolio-data";
+
+const SITE_TITLE = "Mitakshi Sharma — Social Media Manager · Content Strategist · Designer";
+const SITE_DESC =
+  "Premium portfolio of Mitakshi Sharma. Social media management, content strategy, personal branding and graphic design for ambitious brands.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Mitakshi Sharma — Social Media Manager · Content Strategist · Designer" },
-      {
-        name: "description",
-        content:
-          "Premium portfolio of Mitakshi Sharma. Social media management, content strategy, personal branding and graphic design for ambitious brands.",
-      },
-      { property: "og:title", content: "Mitakshi Sharma — Portfolio" },
-      { property: "og:description", content: "Helping brands transform their online presence through creativity, strategy, and meaningful engagement." },
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESC },
+      { name: "keywords", content: "Mitakshi Sharma, social media manager, content strategist, graphic designer, personal branding, LinkedIn growth, portfolio" },
+      { name: "theme-color", content: "#0f0820" },
+      { property: "og:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESC },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/" },
+      { property: "og:image", content: "/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:site_name", content: "Mitakshi Sharma" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESC },
+      { name: "twitter:image", content: "/og-image.jpg" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name: "Mitakshi Sharma",
+          jobTitle: "Social Media Manager, Content Strategist, Graphic Designer",
+          email: "mailto:Mitakshi2005@gmail.com",
+          telephone: "+91-97582-82404",
+          url: "/",
+          sameAs: ["https://www.linkedin.com/in/mitakshi-sharma/"],
+        }),
+      },
     ],
   }),
   component: Portfolio,
@@ -39,24 +68,32 @@ const NAV = [
 
 function Portfolio() {
   const [resumeOpen, setResumeOpen] = useState(false);
+  const [activeCase, setActiveCase] = useState<CaseStudy | null>(null);
 
   return (
     <>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-[color:var(--color-glow)]"
+      >
+        Skip to content
+      </a>
       <LoadingScreen />
       <CustomCursor />
       <Background3D />
       <ThemeSwitcher />
       <ResumeModal open={resumeOpen} onClose={() => setResumeOpen(false)} />
+      <CaseStudyModal study={activeCase} onClose={() => setActiveCase(null)} />
 
       <Nav onResume={() => setResumeOpen(true)} />
 
-      <main className="relative">
+      <main id="main" className="relative">
         <Hero onResume={() => setResumeOpen(true)} />
         <About />
         <Skills />
         <Experience />
         <Services />
-        <Work />
+        <Work onOpen={setActiveCase} />
         <Stats />
         <Analytics />
         <Testimonials />
@@ -471,30 +508,22 @@ function Services() {
 
 /* ---------------- WORK ---------------- */
 const WORK_CATEGORIES = ["All", "Social Media", "Branding", "Content", "Design", "LinkedIn"] as const;
-const WORK = [
-  { t: "Local boutique relaunch", cat: "Social Media", tone: ["#b388ff", "#7fd6ff"] },
-  { t: "Studio brand system", cat: "Branding", tone: ["#ff9ec7", "#ffd6a5"] },
-  { t: "Founder LinkedIn growth", cat: "LinkedIn", tone: ["#7fd6ff", "#6fe7d8"] },
-  { t: "Cafe content calendar", cat: "Content", tone: ["#ffd6a5", "#ff9ec7"] },
-  { t: "Carousel design system", cat: "Design", tone: ["#b388ff", "#ff9ec7"] },
-  { t: "Festival campaign push", cat: "Social Media", tone: ["#ff9c5b", "#ff5fa2"] },
-  { t: "Educator personal brand", cat: "LinkedIn", tone: ["#c9a8ff", "#9a8bff"] },
-  { t: "Wellness brand visuals", cat: "Design", tone: ["#6fe7d8", "#b388ff"] },
-];
 
-function Work() {
+function Work({ onOpen }: { onOpen: (s: CaseStudy) => void }) {
   const [filter, setFilter] = useState<(typeof WORK_CATEGORIES)[number]>("All");
-  const visible = WORK.filter((w) => filter === "All" || w.cat === filter);
+  const visible = CASE_STUDIES.filter((w) => filter === "All" || w.category === filter);
   return (
     <section id="work" className="relative px-6 py-32 md:px-12">
       <div className="mx-auto max-w-7xl">
-        <SectionHead kicker="Selected Work" title={<>Recent <span className="text-gradient">projects.</span></>} />
-        <div className="mb-10 flex flex-wrap gap-2">
+        <SectionHead kicker="Selected Work" title={<>Recent <span className="text-gradient">case studies.</span></>} intro="Click any project to open the full case study — gallery, role, tools and outcomes." />
+        <div role="tablist" aria-label="Filter projects by category" className="mb-10 flex flex-wrap gap-2">
           {WORK_CATEGORIES.map((c) => (
             <button
               key={c}
+              role="tab"
+              aria-selected={filter === c}
               onClick={() => setFilter(c)}
-              className={`rounded-full border border-border px-4 py-1.5 text-sm transition ${
+              className={`rounded-full border border-border px-4 py-1.5 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)] ${
                 filter === c ? "bg-primary text-primary-foreground" : "bg-card/40 hover:bg-secondary"
               }`}
             >
@@ -504,27 +533,42 @@ function Work() {
         </div>
         <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4">
           {visible.map((w, i) => (
-            <motion.figure
-              key={w.t + i}
+            <motion.button
+              key={w.slug}
               layout
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }}
+              type="button"
+              onClick={() => onOpen(w)}
+              aria-label={`Open case study: ${w.title}`}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6 }}
               whileHover={{ y: -6 }}
-              className="glass group relative break-inside-avoid overflow-hidden rounded-3xl"
+              className="glass group relative block w-full break-inside-avoid overflow-hidden rounded-3xl text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
               style={{ aspectRatio: i % 3 === 0 ? "4/5" : i % 3 === 1 ? "1/1" : "3/4" }}
             >
+              <img
+                src={w.cover}
+                alt={`${w.title} — ${w.category} project preview`}
+                loading="lazy"
+                width={1024}
+                height={1024}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
               <div
                 className="absolute inset-0"
-                style={{ background: `linear-gradient(135deg, ${w.tone[0]}, ${w.tone[1]})`, opacity: 0.85 }}
+                style={{
+                  background: `linear-gradient(180deg, transparent 30%, color-mix(in oklab, var(--color-background) 85%, transparent)), linear-gradient(135deg, ${w.tone[0]}33, ${w.tone[1]}33)`,
+                }}
               />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.4),transparent_50%)]" />
-              <figcaption className="absolute inset-0 flex flex-col justify-end p-6">
+              <figcaption className="absolute inset-x-0 bottom-0 p-5">
                 <div className="glass rounded-2xl p-4 transition-transform group-hover:-translate-y-1">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{w.cat}</p>
-                  <p className="mt-1 text-lg">{w.t}</p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{w.category}</p>
+                  <p className="mt-1 text-lg">{w.title}</p>
+                  <p className="mt-2 text-xs text-gradient opacity-0 transition-opacity group-hover:opacity-100">View case study →</p>
                 </div>
               </figcaption>
-            </motion.figure>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -675,31 +719,35 @@ function Contact({ onResume }: { onResume: () => void }) {
             initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             onSubmit={(e) => { e.preventDefault(); window.location.href = "mailto:Mitakshi2005@gmail.com"; }}
             className="glass space-y-4 rounded-3xl p-7"
+            aria-label="Contact form"
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Your name" name="name" />
-              <Field label="Email" name="email" type="email" />
+              <Field label="Your name" name="name" autoComplete="name" required />
+              <Field label="Email" name="email" type="email" autoComplete="email" required />
             </div>
-            <Field label="Company / brand" name="company" />
+            <Field label="Company / brand" name="company" autoComplete="organization" />
             <div>
-              <label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Project brief</label>
+              <label htmlFor="contact-message" className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Project brief</label>
               <textarea
+                id="contact-message"
                 name="message"
                 rows={5}
-                className="mt-2 w-full resize-none rounded-2xl border border-border bg-card/40 p-4 text-foreground outline-none transition focus:border-[color:var(--color-glow)]"
+                aria-required="true"
+                className="mt-2 w-full resize-none rounded-2xl border border-border bg-card/40 p-4 text-foreground outline-none transition focus:border-[color:var(--color-glow)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
                 placeholder="Tell me about your brand and what you're hoping to achieve…"
               />
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <button type="submit" className="btn-luxury hover:scale-105">Send message →</button>
+              <button type="submit" className="btn-luxury hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]">Send message →</button>
               <a
                 href="https://wa.me/919758282404"
                 target="_blank" rel="noreferrer"
-                className="btn-luxury-ghost hover:scale-105"
+                className="btn-luxury-ghost hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
+                aria-label="Message Mitakshi on WhatsApp (opens in new tab)"
               >
                 WhatsApp
               </a>
-              <button type="button" onClick={onResume} className="btn-luxury-ghost hover:scale-105">View Resume</button>
+              <button type="button" onClick={onResume} className="btn-luxury-ghost hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]">View Resume</button>
             </div>
           </motion.form>
 
@@ -749,14 +797,22 @@ function Contact({ onResume }: { onResume: () => void }) {
   );
 }
 
-function Field({ label, name, type = "text" }: { label: string; name: string; type?: string }) {
+function Field({ label, name, type = "text", autoComplete, required }: { label: string; name: string; type?: string; autoComplete?: string; required?: boolean }) {
+  const id = `contact-${name}`;
   return (
     <div>
-      <label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{label}</label>
+      <label htmlFor={id} className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+        {label}
+        {required && <span aria-hidden="true" className="ml-1 text-gradient">*</span>}
+      </label>
       <input
+        id={id}
         type={type}
         name={name}
-        className="mt-2 w-full rounded-2xl border border-border bg-card/40 p-3.5 text-foreground outline-none transition focus:border-[color:var(--color-glow)]"
+        autoComplete={autoComplete}
+        required={required}
+        aria-required={required || undefined}
+        className="mt-2 w-full rounded-2xl border border-border bg-card/40 p-3.5 text-foreground outline-none transition focus:border-[color:var(--color-glow)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
       />
     </div>
   );

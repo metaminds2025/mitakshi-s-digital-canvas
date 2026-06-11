@@ -5,7 +5,8 @@ import { ProfileImage } from "./ProfileImage";
 export function LoadingScreen() {
   const [done, setDone] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setDone(true), 2400);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t = setTimeout(() => setDone(true), reduce ? 400 : 2400);
     return () => clearTimeout(t);
   }, []);
 
