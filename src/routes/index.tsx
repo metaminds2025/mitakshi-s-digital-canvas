@@ -8,19 +8,48 @@ import { CustomCursor } from "@/components/portfolio/CustomCursor";
 import { ResumeModal } from "@/components/portfolio/ResumeModal";
 import { ProfileImage } from "@/components/portfolio/ProfileImage";
 import { Counter } from "@/components/portfolio/Counter";
+import { CaseStudyModal } from "@/components/portfolio/CaseStudyModal";
+import { CASE_STUDIES, type CaseStudy } from "@/lib/portfolio-data";
+
+const SITE_TITLE = "Mitakshi Sharma — Social Media Manager · Content Strategist · Designer";
+const SITE_DESC =
+  "Premium portfolio of Mitakshi Sharma. Social media management, content strategy, personal branding and graphic design for ambitious brands.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Mitakshi Sharma — Social Media Manager · Content Strategist · Designer" },
-      {
-        name: "description",
-        content:
-          "Premium portfolio of Mitakshi Sharma. Social media management, content strategy, personal branding and graphic design for ambitious brands.",
-      },
-      { property: "og:title", content: "Mitakshi Sharma — Portfolio" },
-      { property: "og:description", content: "Helping brands transform their online presence through creativity, strategy, and meaningful engagement." },
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESC },
+      { name: "keywords", content: "Mitakshi Sharma, social media manager, content strategist, graphic designer, personal branding, LinkedIn growth, portfolio" },
+      { name: "theme-color", content: "#0f0820" },
+      { property: "og:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESC },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/" },
+      { property: "og:image", content: "/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:site_name", content: "Mitakshi Sharma" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESC },
+      { name: "twitter:image", content: "/og-image.jpg" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name: "Mitakshi Sharma",
+          jobTitle: "Social Media Manager, Content Strategist, Graphic Designer",
+          email: "mailto:Mitakshi2005@gmail.com",
+          telephone: "+91-97582-82404",
+          url: "/",
+          sameAs: ["https://www.linkedin.com/in/mitakshi-sharma/"],
+        }),
+      },
     ],
   }),
   component: Portfolio,
