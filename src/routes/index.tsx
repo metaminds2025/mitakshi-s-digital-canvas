@@ -791,14 +791,22 @@ function Contact({ onResume }: { onResume: () => void }) {
   );
 }
 
-function Field({ label, name, type = "text" }: { label: string; name: string; type?: string }) {
+function Field({ label, name, type = "text", autoComplete, required }: { label: string; name: string; type?: string; autoComplete?: string; required?: boolean }) {
+  const id = `contact-${name}`;
   return (
     <div>
-      <label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{label}</label>
+      <label htmlFor={id} className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+        {label}
+        {required && <span aria-hidden="true" className="ml-1 text-gradient">*</span>}
+      </label>
       <input
+        id={id}
         type={type}
         name={name}
-        className="mt-2 w-full rounded-2xl border border-border bg-card/40 p-3.5 text-foreground outline-none transition focus:border-[color:var(--color-glow)]"
+        autoComplete={autoComplete}
+        required={required}
+        aria-required={required || undefined}
+        className="mt-2 w-full rounded-2xl border border-border bg-card/40 p-3.5 text-foreground outline-none transition focus:border-[color:var(--color-glow)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
       />
     </div>
   );
