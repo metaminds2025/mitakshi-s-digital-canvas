@@ -1,11 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setEnabled(true);
     let x = 0, y = 0, rx = 0, ry = 0;
     const move = (e: MouseEvent) => { x = e.clientX; y = e.clientY; };
     let raf = 0;
@@ -21,10 +24,14 @@ export function CustomCursor() {
     return () => { window.removeEventListener("mousemove", move); cancelAnimationFrame(raf); };
   }, []);
 
+  if (!enabled) return null;
+
   return (
     <>
       <div
         ref={ringRef}
+        aria-hidden="true"
+        role="presentation"
         className="pointer-events-none fixed left-0 top-0 z-[90] hidden h-9 w-9 rounded-full md:block"
         style={{
           border: "1px solid color-mix(in oklab, var(--color-glow) 60%, transparent)",
@@ -33,6 +40,8 @@ export function CustomCursor() {
       />
       <div
         ref={dotRef}
+        aria-hidden="true"
+        role="presentation"
         className="pointer-events-none fixed left-0 top-0 z-[91] hidden h-1.5 w-1.5 rounded-full md:block"
         style={{ background: "var(--color-glow)", boxShadow: "0 0 12px var(--color-glow)" }}
       />

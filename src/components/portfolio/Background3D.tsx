@@ -2,8 +2,9 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, MeshDistortMaterial, Sphere, Stars } from "@react-three/drei";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { usePageVisible, usePerfTier, usePrefersReducedMotion } from "@/hooks/use-perf";
 
-function Particles({ count = 600 }: { count?: number }) {
+function Particles({ count }: { count: number }) {
   const ref = useRef<THREE.Points>(null!);
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
@@ -18,7 +19,7 @@ function Particles({ count = 600 }: { count?: number }) {
     return arr;
   }, [count]);
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (!ref.current) return;
     ref.current.rotation.y += delta * 0.03;
     ref.current.rotation.x += delta * 0.01;
@@ -50,15 +51,17 @@ function GlassOrb({
   scale = 1,
   color,
   speed = 1,
+  segments = 64,
 }: {
   position: [number, number, number];
   scale?: number;
   color: string;
   speed?: number;
+  segments?: number;
 }) {
   return (
     <Float speed={speed} rotationIntensity={0.6} floatIntensity={1.4}>
-      <Sphere args={[1, 64, 64]} position={position} scale={scale}>
+      <Sphere args={[1, segments, segments]} position={position} scale={scale}>
         <MeshDistortMaterial
           color={color}
           distort={0.35}
@@ -73,10 +76,20 @@ function GlassOrb({
   );
 }
 
-function Scene() {
+function Scene({
+  particleCount,
+  starCount,
+  segments,
+  interactive,
+}: {
+  particleCount: number;
+  starCount: number;
+  segments: number;
+  interactive: boolean;
+}) {
   const group = useRef<THREE.Group>(null!);
   useFrame((state) => {
-    if (!group.current) return;
+    if (!group.current || !interactive) return;
     const { x, y } = state.pointer;
     group.current.rotation.y += (x * 0.4 - group.current.rotation.y) * 0.04;
     group.current.rotation.x += (-y * 0.25 - group.current.rotation.x) * 0.04;
@@ -88,18 +101,35 @@ function Scene() {
       <pointLight position={[-8, -4, -4]} intensity={1.2} color="#7fd6ff" />
       <pointLight position={[0, -8, 6]} intensity={0.9} color="#ff9ec7" />
 
-      <Stars radius={40} depth={40} count={1800} factor={3} fade speed={0.6} />
-      <Particles />
+      {starCount > 0 && (
+        <Stars radius={40} depth={40} count={starCount} factor={3} fade speed={0.6} />
+      )}
+      {particleCount > 0 && <Particles count={particleCount} />}
 
-      <GlassOrb position={[-3.2, 1.4, -1]} scale={1.4} color="#b388ff" speed={1.1} />
-      <GlassOrb position={[3.5, -1.6, -2]} scale={1.7} color="#7fd6ff" speed={0.9} />
-      <GlassOrb position={[0.5, 2.4, -3]} scale={0.9} color="#ff9ec7" speed={1.3} />
-      <GlassOrb position={[-2, -2.4, 0]} scale={0.7} color="#ffd6a5" speed={1.0} />
+      <GlassOrb position={[-3.2, 1.4, -1]} scale={1.4} color="#b388ff" speed={1.1} segments={segments} />
+      <GlassOrb position={[3.5, -1.6, -2]} scale={1.7} color="#7fd6ff" speed={0.9} segments={segments} />
+      <GlassOrb position={[0.5, 2.4, -3]} scale={0.9} color="#ff9ec7" speed={1.3} segments={segments} />
+      <GlassOrb position={[-2, -2.4, 0]} scale={0.7} color="#ffd6a5" speed={1.0} segments={segments} />
     </group>
   );
 }
 
 export function Background3D() {
+  const tier = usePerfTier();
+  const visible = usePageVisible();
+  const reduce = usePrefersReducedMotion();
+
+  // If the user prefers reduced motion, render a static gradient instead of the WebGL scene.
+  if (reduce) {
+    return <div className="fixed inset-0 -z-10 pointer-events-none" aria-hidden />;
+  }
+
+  const settings = {
+    low: { particles: 0, stars: 600, segments: 24, dpr: [1, 1] as [number, number] },
+    medium: { particles: 300, stars: 1200, segments: 40, dpr: [1, 1.3] as [number, number] },
+    high: { particles: 600, stars: 1800, segments: 64, dpr: [1, 1.6] as [number, number] },
+  }[tier];
+
   return (
     <div
       className="fixed inset-0 -z-10 pointer-events-none"
@@ -108,14 +138,19 @@ export function Background3D() {
     >
       <Canvas
         camera={{ position: [0, 0, 7], fov: 55 }}
-        dpr={[1, 1.6]}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        dpr={settings.dpr}
+        gl={{ antialias: tier !== "low", alpha: true, powerPreference: "high-performance" }}
+        frameloop={visible ? "always" : "never"}
       >
         <Suspense fallback={null}>
-          <Scene />
+          <Scene
+            particleCount={settings.particles}
+            starCount={settings.stars}
+            segments={settings.segments}
+            interactive={tier === "high"}
+          />
         </Suspense>
       </Canvas>
-      {/* soft top/bottom vignettes to keep contrast */}
       <div
         className="absolute inset-0"
         style={{
