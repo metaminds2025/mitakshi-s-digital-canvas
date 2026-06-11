@@ -713,31 +713,35 @@ function Contact({ onResume }: { onResume: () => void }) {
             initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             onSubmit={(e) => { e.preventDefault(); window.location.href = "mailto:Mitakshi2005@gmail.com"; }}
             className="glass space-y-4 rounded-3xl p-7"
+            aria-label="Contact form"
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Your name" name="name" />
-              <Field label="Email" name="email" type="email" />
+              <Field label="Your name" name="name" autoComplete="name" required />
+              <Field label="Email" name="email" type="email" autoComplete="email" required />
             </div>
-            <Field label="Company / brand" name="company" />
+            <Field label="Company / brand" name="company" autoComplete="organization" />
             <div>
-              <label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Project brief</label>
+              <label htmlFor="contact-message" className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Project brief</label>
               <textarea
+                id="contact-message"
                 name="message"
                 rows={5}
-                className="mt-2 w-full resize-none rounded-2xl border border-border bg-card/40 p-4 text-foreground outline-none transition focus:border-[color:var(--color-glow)]"
+                aria-required="true"
+                className="mt-2 w-full resize-none rounded-2xl border border-border bg-card/40 p-4 text-foreground outline-none transition focus:border-[color:var(--color-glow)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
                 placeholder="Tell me about your brand and what you're hoping to achieve…"
               />
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <button type="submit" className="btn-luxury hover:scale-105">Send message →</button>
+              <button type="submit" className="btn-luxury hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]">Send message →</button>
               <a
                 href="https://wa.me/919758282404"
                 target="_blank" rel="noreferrer"
-                className="btn-luxury-ghost hover:scale-105"
+                className="btn-luxury-ghost hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]"
+                aria-label="Message Mitakshi on WhatsApp (opens in new tab)"
               >
                 WhatsApp
               </a>
-              <button type="button" onClick={onResume} className="btn-luxury-ghost hover:scale-105">View Resume</button>
+              <button type="button" onClick={onResume} className="btn-luxury-ghost hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-glow)]">View Resume</button>
             </div>
           </motion.form>
 
